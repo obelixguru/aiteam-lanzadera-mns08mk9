@@ -21,124 +21,137 @@ const GMB_PAYLOAD = {
   },
 }
 
-const DAYS_ES: Record<string, string> = {
-  MONDAY: "Lunes",
-  TUESDAY: "Martes",
-  WEDNESDAY: "Miércoles",
-  THURSDAY: "Jueves",
-  FRIDAY: "Viernes",
-}
-
-function formatTime(t: { hours: number; minutes: number }) {
-  return `${String(t.hours).padStart(2, "0")}:${String(t.minutes).padStart(2, "0")}`
-}
+const UPDATE_MASK = "profile.description,regularHours"
+const API_ENDPOINT = "https://mybusinessbusinessinformation.googleapis.com/v1/{name=locations/*}?updateMask=" + UPDATE_MASK
 
 export default function SeoFixPage() {
-  const [copied, setCopied] = useState(false)
-  const payloadStr = JSON.stringify(GMB_PAYLOAD, null, 2)
+  const [copied, setCopied] = useState<"payload" | "endpoint" | null>(null)
 
-  async function handleCopy() {
-    await navigator.clipboard.writeText(payloadStr)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2000)
+  function copyToClipboard(text: string, type: "payload" | "endpoint") {
+    navigator.clipboard.writeText(text).then(() => {
+      setCopied(type)
+      setTimeout(() => setCopied(null), 2000)
+    })
   }
+
+  const payloadString = JSON.stringify(GMB_PAYLOAD, null, 2)
 
   return (
     <div className="p-8 max-w-4xl">
-      <h1 className="text-2xl font-bold tracking-tight text-black mb-1">Corrección SEO Local</h1>
+      <h1 className="text-2xl font-bold tracking-tight text-black mb-2">
+        Corrección SEO — Google Business Profile
+      </h1>
       <p className="text-sm text-gray-500 mb-8">
-        Corrige los hallazgos críticos de la auditoría: horarios de apertura y descripción editorial
-        faltantes en el Perfil de Empresa de Google.
+        Este módulo genera el payload JSON exacto para corregir los hallazgos
+        críticos de la auditoría SEO local: horarios de apertura y descripción
+        editorial faltantes en el Perfil de Empresa de Google.
       </p>
 
       {/* Audit findings */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
-        <Card className="border-red-200 bg-red-50/30">
+      <div className="grid gap-4 md:grid-cols-2 mb-8">
+        <Card className="border border-gray-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-red-800">Hallazgo: Horarios faltantes</CardTitle>
+            <CardTitle className="text-sm font-semibold text-gray-900">
+              Horarios no publicados
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-red-700">
-              El Perfil de Empresa de Google de Lanzadera no muestra horarios de apertura.
-              Esto reduce la visibilidad local y la confianza del usuario.
+            <p className="text-xs text-gray-500">
+              La auditoría detectó que el Perfil de Empresa de Google de
+              Lanzadera no tiene horarios de apertura configurados. El payload
+              incluye L-J 9:00-19:00 y V 9:00-15:00.
             </p>
           </CardContent>
         </Card>
-        <Card className="border-red-200 bg-red-50/30">
+        <Card className="border border-gray-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-semibold text-red-800">Hallazgo: Sin descripción editorial</CardTitle>
+            <CardTitle className="text-sm font-semibold text-gray-900">
+              Descripción editorial ausente
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-xs text-red-700">
-              Falta una descripción editorial en el perfil de Google. Esto impacta negativamente
-              el SEO local y la claridad de la oferta.
+            <p className="text-xs text-gray-500">
+              No existe una descripción editorial en el perfil. El payload
+              incluye una descripción optimizada que destaca los programas y el
+              respaldo de Juan Roig.
             </p>
           </CardContent>
         </Card>
       </div>
 
-      {/* Preview */}
-      <Card className="mb-6">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-sm font-semibold">Vista previa de la corrección</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Descripción editorial</h3>
-            <p className="text-sm text-gray-800 leading-relaxed border-l-2 border-black pl-3">
-              {GMB_PAYLOAD.profile.description}
-            </p>
-          </div>
-          <div>
-            <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Horarios de apertura</h3>
-            <div className="space-y-1">
-              {GMB_PAYLOAD.regularHours.periods.map((p) => (
-                <div key={p.openDay} className="flex items-center gap-3 text-sm">
-                  <span className="w-24 font-medium text-gray-700">{DAYS_ES[p.openDay]}</span>
-                  <span className="text-gray-600">
-                    {formatTime(p.openTime)} – {formatTime(p.closeTime)}
-                  </span>
-                </div>
-              ))}
-              <div className="flex items-center gap-3 text-sm">
-                <span className="w-24 font-medium text-gray-400">Sábado</span>
-                <span className="text-gray-400">Cerrado</span>
-              </div>
-              <div className="flex items-center gap-3 text-sm">
-                <span className="w-24 font-medium text-gray-400">Domingo</span>
-                <span className="text-gray-400">Cerrado</span>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* JSON payload */}
-      <Card>
-        <CardHeader className="pb-3 flex flex-row items-center justify-between">
-          <div>
-            <CardTitle className="text-sm font-semibold">Payload JSON para Google Business Profile API</CardTitle>
-            <p className="text-xs text-gray-500 mt-1">
-              PATCH https://mybusinessbusinessinformation.googleapis.com/v1/&#123;locations/*&#125;?updateMask=profile.description,regularHours
-            </p>
-          </div>
-          <Button variant="outline" size="sm" onClick={handleCopy} className="shrink-0">
-            {copied ? "✓ Copiado" : "Copiar Payload"}
+      {/* API Endpoint */}
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            API Endpoint (PATCH)
+          </label>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs h-7"
+            onClick={() => copyToClipboard(API_ENDPOINT, "endpoint")}
+          >
+            {copied === "endpoint" ? "Copiado" : "Copiar"}
           </Button>
+        </div>
+        <code className="block w-full p-3 bg-[#F9F9F9] border border-gray-200 rounded-md text-xs text-gray-700 font-mono break-all">
+          {API_ENDPOINT}
+        </code>
+        <p className="text-xs text-gray-400 mt-1">
+          Requiere: OAuth 2.0 con permisos de propietario del perfil de empresa.
+          updateMask={UPDATE_MASK}
+        </p>
+      </div>
+
+      {/* JSON Payload */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-2">
+          <label className="text-xs font-semibold text-gray-700 uppercase tracking-wider">
+            Payload JSON
+          </label>
+          <Button
+            variant="outline"
+            size="sm"
+            className="text-xs h-7"
+            onClick={() => copyToClipboard(payloadString, "payload")}
+          >
+            {copied === "payload" ? "Copiado" : "Copiar Payload"}
+          </Button>
+        </div>
+        <textarea
+          readOnly
+          value={payloadString}
+          className="w-full h-96 p-4 bg-[#F9F9F9] border border-gray-200 rounded-md text-xs text-gray-800 font-mono resize-none focus:outline-none"
+        />
+      </div>
+
+      {/* Instructions */}
+      <Card className="border border-dashed border-gray-300 bg-white">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-sm font-semibold text-gray-900">
+            Instrucciones de aplicación
+          </CardTitle>
         </CardHeader>
-        <CardContent>
-          <textarea
-            readOnly
-            value={payloadStr}
-            className="w-full h-80 font-mono text-xs bg-[#F9F9F9] border border-gray-200 rounded-md p-4 resize-none focus:outline-none"
-          />
+        <CardContent className="text-xs text-gray-600 space-y-2">
+          <p>
+            1. Accede a la consola de Google Business Profile con la cuenta
+            propietaria del perfil de Lanzadera.
+          </p>
+          <p>
+            2. <strong>Opción manual:</strong> Actualiza los horarios (L-J
+            9-19h, V 9-15h) y la descripción directamente desde la interfaz web.
+          </p>
+          <p>
+            3. <strong>Opción API:</strong> Usa el payload JSON de arriba con una
+            petición PATCH autenticada al endpoint indicado (requiere OAuth con
+            verificación de propiedad del negocio).
+          </p>
+          <p>
+            4. Tras aplicar los cambios, los hallazgos de la auditoría SEO local
+            quedarán resueltos y la puntuación debería subir significativamente.
+          </p>
         </CardContent>
       </Card>
-
-      <p className="text-xs text-gray-400 mt-4">
-        Instrucciones: Copia el payload y aplícalo mediante la consola de Google Business Profile API
-        o envíalo al equipo técnico de Google My Business de Lanzadera.
-      </p>
     </div>
   )
 }
