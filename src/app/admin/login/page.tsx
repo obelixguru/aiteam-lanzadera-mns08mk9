@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { analytics } from "@/lib/analytics"
 
 export default function AdminLoginPage() {
   const [email, setEmail] = useState("")
@@ -32,6 +33,7 @@ export default function AdminLoginPage() {
       return
     }
 
+    analytics.adminLoginSuccess()
     router.push("/admin/dashboard")
     router.refresh()
   }

@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { Geist } from "next/font/google"
 import "./globals.css"
 import { cn } from "@/lib/utils"
+import { GA4Script } from "@/components/ga4-script"
 
 const geist = Geist({ subsets: ["latin"], variable: "--font-sans" })
 
@@ -48,6 +49,7 @@ export default function RootLayout({
   return (
     <html lang="es" className={cn("h-full antialiased font-sans", geist.variable)}>
       <body className="min-h-full flex flex-col font-sans bg-white text-black">
+        <GA4Script />
         {children}
       </body>
     </html>

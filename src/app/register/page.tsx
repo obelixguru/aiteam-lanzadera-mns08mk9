@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -8,6 +8,7 @@ import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/com
 import { PlacesAutocomplete } from "@/components/places-autocomplete"
 import { createClient } from "@/lib/supabase/client"
 import Link from "next/link"
+import { analytics } from "@/lib/analytics"
 
 interface PlaceDetails {
   name: string
@@ -44,6 +45,12 @@ export default function RegisterPage() {
   // Step 3 — Program
   const [programa, setPrograma] = useState<Programa | null>(null)
   const [sector, setSector] = useState("")
+
+  useEffect(() => { analytics.funnelStart() }, [])
+  useEffect(() => {
+    if (step === 2) analytics.funnelStep2()
+    if (step === 3) analytics.funnelStep3()
+  }, [step])
 
   function handlePlaceSelect(details: PlaceDetails) {
     setEmpresa(details.name)
@@ -87,6 +94,7 @@ export default function RegisterPage() {
         score: 0,
         status: "nuevo",
       })
+      analytics.leadFormSubmit(programa)
       setSubmitted(true)
     } catch {
       alert("Error al enviar. Inténtalo de nuevo.")

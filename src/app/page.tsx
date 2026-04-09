@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/components/ui/card"
+import { TrackLandingView } from "@/components/track-page-view"
 
 function JsonLd() {
   const schema = {
@@ -52,6 +53,7 @@ export default function Home() {
   return (
     <>
       <JsonLd />
+      <TrackLandingView />
 
       {/* Header */}
       <header className="sticky top-0 z-50 bg-white/95 backdrop-blur border-b border-border">
